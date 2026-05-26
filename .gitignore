@@ -216,3 +216,17 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ======================
+# Leverage or not. 
+# ======================
+
+# 실험한 파일들 (Only in Local, some could be leveraged.)
+experiments/
+
+# Juypter Notebook - experiment and validation (Only in Local)
+notebooks/
+
+# 데이터 (Lack of storage - Only in Local)
+data/
+*.parquet
