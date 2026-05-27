@@ -227,6 +227,17 @@ experiments/
 # Juypter Notebook - experiment and validation (Only in Local)
 notebooks/
 
-# 데이터 (Lack of storage - Only in Local)
+# Data (Lack of storage - Only in Local)
+downloader/
 data/
 *.parquet
+
+# Script (Only in Local) 
+scripts/
+
+# Processor (Only in Local)
+processor/
+
+# Old Result (Only in Local) 
+results2/
+
