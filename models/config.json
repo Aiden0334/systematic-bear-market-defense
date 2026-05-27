@@ -1,9 +1,0 @@
-{
-  "long_thr": 0.54,
-  "short_thr": 0.5,
-  "max_hold": 64,
-  "cooldown": 96,
-  "fee_rate": 0.0008,
-  "target": "target_dir_strong_15m",
-  "train_end": "2024-12-31"
-}
