@@ -113,9 +113,9 @@ Short signals showed inconsistent win rates across all walk-forward years. Valid
 
 ### Walk-Forward Validation
 
-# Training: Rolling 2-year window
-# Testing:  1-year out-of-sample
-# Safety:   Skip if training data < 700 days
+> Training: Rolling 2-year window
+> Testing:  1-year out-of-sample
+> Safety:   Skip if training data < 700 days
 
 **Why rolling window (not expanding)?**
 
