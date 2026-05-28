@@ -325,11 +325,12 @@ systematic-bear-market-defense/
 
 ## Future Work
 
-**Project 2 — Statistical Mean Reversion**
+**Project 2 — Statistical Mean Reversion (Alpha Generator)**
 - Bollinger Band ±2σ breakout with several regime filters
 - Multi-timeframe: A day or 4-hour signal & 1 hour entry
 - CLT-based justification (window ≥ 30)
-- Leveraged MoE
+- Utilize Massive API Data
+- Leverage MoE
 
 **Project 3 — Option Pricing Model**
 - Black-Scholes Model with option greeks in deep learning
