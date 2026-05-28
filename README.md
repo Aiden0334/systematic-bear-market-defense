@@ -232,9 +232,14 @@ Data sourced exclusively from Binance USDT-M Futures. Cross-exchange liquidity d
 
 ## How to Run
 
-### Requirements
-```bash
-pip install -r requirements.txt
+### Packages
+```
+pandas
+numpy
+xgboost
+pyarrow
+scikit-learn
+matplotlib
 ```
 
 ### Data Preparation
@@ -271,20 +276,54 @@ systematic-bear-market-defense/
 
 ## Lessons Learned
 
-**1. Data quality over model complexity**
-SMC features were theoretically superior but practically useless due to data quality. Removing them improved MDD significantly. Clean simple features outperformed complex noisy ones.
+### Data Issues
 
-**2. Let data redefine the objective**
-Started with alpha generation. Data showed the real edge was in bear market defense. Repositioning the objective led to a more honest and validated strategy.
+**1. SMC Feature Data Quality**
+Smart Money Concept features (BOS, CHoCH, Order Blocks, FVG) were theoretically the most relevant indicators for liquidity event detection. However, more than 80% NaN or noise during feature engineering were in Binance API data. Removed them significantly and improved MDD. 
 
-**3. Walk-forward discipline**
-Every decision was validated through walk-forward testing, not in-sample optimization. Rolling window over expanding window because crypto markets shift frequently.
+**2. Short-Timeframe Noise**
+Initial target was 1-minute horizon. However, 1 minute horizon was unpredictable. Second target was 15-minute horizon. Lag 1 autocorrelation of -0.05 confirmed pure noise. (Also unpredictable) 1-hour horizon also had 0.59 autocorrelation. (could be leveraged)
+Finally, leveraged 4-hour target (low samples but low noise, lag-1 Autocorrelation: 0.81)
 
-**4. Seed robustness is non-negotiable**
-Single seed results are anecdotal. 10-seed validation confirmed CAGR std of 3.90% — low enough to trust the signal over luck.
+**3. Ethereum Data Start Date**
+Bitcoin data starts 2019-09-25 and ETH starts 2019-11-27. (2 month difference)
+Adjusted walk-forward start date.
 
-**5. Honest reporting builds credibility**
-Strong bull market underperformance is reported without hiding. Failed attempts are documented. Statistically unreliable Sharpe ratios are marked N/A. Transparency is the point.
+### Model Issues
+
+**4. Regime Detection (HMM)**
+Hidden Markov Model tested for regime classification (3-state). Distribution shift across walkforward periods caused the model to misclassify BTC market regimes. Some cases had an opposite direction and simple MA alignment (regime3) proved more stable. 
+Learned the reason why we do not leverage model more sophisticated. -> ovefitting risk
+
+**5. Short Signal Inconsistency**
+Short signals showed inconsistent win rates across all walkforward years. Validated them in 6 years but finally turned off short signal and exploited long-only strategy. 
+
+**6. Seed Dependency**
+Single seed results are anecdotal. 10-seed validation confirmed CAGR std of 3.9%. (Acceptable robustness)
+
+### Strategy Issues
+
+**7. Insufficient Samples in Bull Market**
+2023: 9 trades / 2024: 1 trade only
+Sharpe ratio statistically unreliable below 30 trades. 
+Root cause: liquidity events were rare during quiet bull markets.
+(Low frequency signals in event-driven strategy)
+
+**8. Dynamic Allocation Failure**
+MA50/200 crossover tested for dynamic BnH and strategy allocation but lagging signal resulted in missed entries (e.g., CAGR dropped to 8.3%) 
+Static allocation (BTC Hold 20% / Strategy 80%) was considered. 
+
+**9. ETH Strategy MDD**
+ETH strategy showed -47.8% during 2022 despite 14.1% anuual return. Operationally unreliable and drawdown was too severe to hold through. ETH excluded from portfolio and used only for out-of-sample validation. Shifted the focus toward a risk management model, not the alpha strategy model. 
+
+### Validation Issues
+
+**10. Walkforward Safety Guard**
+2021 training data: it had only 463 days (lower than 700 day minimum). 
+Trading was blocked and held only USD Tether. 
+Without this guard, model would train on insufficient data and generate unreliable signals. 
+
+More validations needed in any volatility markets with better quality data. 
 
 ---
 
@@ -300,13 +339,16 @@ Strong bull market underperformance is reported without hiding. Failed attempts 
 
 **Improvement Areas**
   - Higher quality liquidity data (order book, on-chain)
-  - SMC feature re-validation with better data source
+  - SMC feature re-validation with better quality liquidity data
+  - Improve signal quality in transitional markets (regime detection)
   - Cross-exchange data integration
+  - Increase test data (2026) and execute live trading validation
 
 ---
 
 **Data source: Binance USDT-M Perpetual Futures**
-**Backtest period: 2021–2025 (5-year walk-forward)**
+**Indicator source: TradingView LuxAlgo** 
+**Backtest period: 2021–2026 (6-year walk-forward)**
 **Out-of-sample: ETH validation with identical model setup**
 
 
