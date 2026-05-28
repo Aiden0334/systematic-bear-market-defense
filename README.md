@@ -158,7 +158,7 @@ Low standard deviation confirms results are not dependent on a lucky random seed
 
 ---
 
-## 📈 Results
+## Results
 
 ### BTC Strategy (5-Year Walk-Forward)
 
