@@ -39,7 +39,7 @@ The core liquidity features (SMC: BOS, CHoCH, Order Blocks, FVG) that were theor
 
 Binance API data quality issues(>80% NaN or noise) resulted in these features practically unusable. Despite being the theoretical backbone of the strategy, they ahd to be removed entirely.
 
-Ironically, MDD improved significally after removal. I confirmed that low-quality features introduce noise rather than signal, regardless of their theoretical releveance. 
+Ironically, MDD improved significally after removal. Learned low-quality features introduce noise rather than signal, regardless of their theoretical releveance. 
 
 **3. Insufficient Samples in Bull Markets**
 - Liquidity events are rare during quiet bull markets
