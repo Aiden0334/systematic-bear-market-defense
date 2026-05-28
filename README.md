@@ -249,6 +249,7 @@ Pre-computed results available in `validator & results/`:
 
 ## Repository Structure
 
+'''
 systematic-bear-market-defense/
 ├── README.md
 ├── requirements.txt
@@ -264,6 +265,7 @@ systematic-bear-market-defense/
     ├── ETH_walkforward_results.csv
     ├── walkforward_btc1.py    ← BTC 6-year walk-forward
     └── walkforward_eth1.py    ← ETH out-of-sample validation
+'''
 
 ---
 
