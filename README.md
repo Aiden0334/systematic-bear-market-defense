@@ -11,10 +11,10 @@ The model detects liquidity-driven events (forced liquidations, volatility explo
 
 **Bear market defense validated across 5 years (2021–2025):**
 
-- 2022 crash: BTC (BnH) -64.2% → Strategy  **-11.69%**
-              ETH (BnH) -67.6% → Strategy  **+14.07%**
-- 2025 bear:  BTC (BnH) -5.6% → Strategy   **+23.97%**
-              ETH (BnH) -11.4% → Strategy  **+9.36%**
+- 2022 crash: BTC (BnH) -64.2% → Strategy    **-11.69%**
+              / ETH (BnH) -67.6% → Strategy  **+14.07%**
+- 2025 bear:  BTC (BnH) -5.6% → Strategy     **+23.97%**
+              / ETH (BnH) -11.4% → Strategy  **+9.36%**
 
 **Out of sample validation (ETH):**
 - Same model, same parameters applied to ETH without modification
