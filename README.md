@@ -23,7 +23,7 @@ The model detects liquidity-driven events (forced liquidations, volatility explo
 
 ---
 
-## 🎯 Motivation
+## Motivation
 
 The initial goal was to develop an alpha strategy leveraging BTC 1-minute bar data. However, three critical issues were identified during validation:
 
@@ -55,7 +55,7 @@ The strategy was repositioned as a **risk management model**:
 
 ---
 
-## 🔍 Model Overview
+## Model Overview
 
 This model detects **liquidity-driven events** in cryptocurrency futures markets and captures short-term mean reversion following price dislocations.
 
