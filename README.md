@@ -250,11 +250,11 @@ Pre-computed results available in `validator & results/`:
 ## Repository Structure
 
 systematic-bear-market-defense/
-- README.md
-- requirements.txt
-- .gitignore
-- LICENSE
-- src/
+|- README.md
+|- requirements.txt
+|- .gitignore
+|- LICENSE
+|- src/
    ─ make_targets_btc.py    ← Target label generation
    ─ config.py              ← Data collection configuration
 ─ models/
