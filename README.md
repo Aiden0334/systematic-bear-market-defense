@@ -347,8 +347,8 @@ More validations needed in any volatility markets with better quality data.
 ---
 
 **Data source: Binance USDT-M Perpetual Futures**
-**Indicator source: TradingView LuxAlgo** 
-**Backtest period: 2021–2026 (6-year walk-forward)**
+**Indicator source: TradingView** 
+**Backtest period: 2021–2025 (5-year walk-forward)**
 **Out-of-sample: ETH validation with identical model setup**
 
 
