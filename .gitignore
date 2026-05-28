@@ -241,3 +241,5 @@ processor/
 # Old Result (Only in Local) 
 results2/
 
+# Old Result (Removed)
+validator & results/
