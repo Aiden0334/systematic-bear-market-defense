@@ -250,20 +250,20 @@ Pre-computed results available in `validator & results/`:
 ## Repository Structure
 
 systematic-bear-market-defense/
-|- README.md
-|- requirements.txt
-|- .gitignore
-|- LICENSE
-|- src/
-   ─ make_targets_btc.py    ← Target label generation
-   ─ config.py              ← Data collection configuration
-─ models/
-   ─ feature_cols.json      ← 100 selected features
-─ validator & results/
-   ─ 6y_walkforward_safe_results.csv
-   ─ ETH_walkforward_results.csv
-   ─ walkforward_btc1.py    ← BTC 6-year walk-forward
-   ─ walkforward_eth1.py    ← ETH out-of-sample validation
+├── README.md
+├── requirements.txt
+├── .gitignore
+├── LICENSE
+├── src/
+│   ├── make_targets_btc.py    ← Target label generation
+│   └── config.py              ← Data collection configuration
+├── models/
+│   └── feature_cols.json      ← 100 selected features
+└── validator & results/
+    ├── 6y_walkforward_safe_results.csv
+    ├── ETH_walkforward_results.csv
+    ├── walkforward_btc1.py    ← BTC 6-year walk-forward
+    └── walkforward_eth1.py    ← ETH out-of-sample validation
 
 ---
 
