@@ -80,7 +80,7 @@ Liquidity events are rare when markets trend smoothly upward. Low signal frequen
 - **Period**: 2019-09-25 ~ 2026-04-23 (~230,000 bars)
 - **Features**: 100 features across momentum, volatility, volume, order flow, open interest, funding rate, long/short ratio, time **(removed smc features for final validation)**
 
->>> Raw data not included due to file size. See `src/config.py` for data collection setup.
+> Raw data not included due to file size. See `src/config.py` for data collection setup.
 
 ### Target Definition
 4-hour direction label (16 bars × 15 min) with ±0.8% threshold:
@@ -92,12 +92,12 @@ Liquidity events are rare when markets trend smoothly upward. Low signal frequen
 **XGBoost Classifier** — 3-class (down / sideways / up)
 
 | Parameter | Value | Reason |
-----------------------------------------------------------
+|-----------|-------|--------|
 | n_estimators | 100 | Balance between speed and accuracy |
 | max_depth | 4 | Prevent overfitting |
 | learning_rate | 0.05 | Slow convergence, better generalization |
-| subsample | 0.8 | Row sub-sampling, prevent overfitting |
-| colsample_bytree | 0.8 | Feature sub-sampling, prevent overfitting |
+| subsample | 0.8 | Row subsampling, prevent overfitting |
+| colsample_bytree | 0.8 | Feature subsampling, prevent overfitting |
 | min_child_weight | 10 | Prevent learning sparse patterns |
 | reg_alpha | 0.1 | L1 regularization |
 | reg_lambda | 1.0 | L2 regularization |
@@ -130,7 +130,7 @@ Exact 2 years = 730 days, but leap year variations cause 729-day windows. 700-da
 100 features across 21 categories. Key categories:
 
 | Category | Examples | Purpose |
-----------------------------------------------------------
+|----------|---------|---------|
 | Volatility | volatility_5m/15m/60m/240m | Detect volatility explosion |
 | HL Range | hl_range_5m/15m/60m/240m | Measure price range (top importance: 0.162) |
 | Liquidity Sweep | swept_high/low_15m/60m | Detect stop hunts |
@@ -140,15 +140,15 @@ Exact 2 years = 730 days, but leap year variations cause 729-day windows. 700-da
 | Swing VWAP | swing_vwap_dist, swing_vwap_dir | Liquidity-based price position |
 | Time | time_us_session, time_hour_sin/cos | Session-based liquidity patterns |
 
->>> Full feature list: `models/feature_cols.json`
->>> Feature descriptions: `models/feature_description.md`
+> Full feature list: `models/feature_cols.json`
+> Feature descriptions: `models/feature_description.md`
 
 **Note on SMC features**: Smart Money Concept features (BOS, CHoCH, Order Blocks, FVG) were initially included as core liquidity event indicators. However, Binance API data quality issues (>80% NaN or noise, serious) led to their removal. **MDD improved significantly after removal.**
 
 ### Seed Robustness
 
 | Metric | Value |
-----------------------------------------------------------
+|--------|-------|
 | Seeds tested | 10 (0, 1, 2, 3, 7, 42, 100, 2024, 9999, 31415) |
 | Positive CAGR | 10/10 |
 | Average CAGR | 10.84% |
@@ -163,7 +163,7 @@ Low standard deviation confirms results are not dependent on a lucky random seed
 ### BTC Strategy (5-Year Walk-Forward)
 
 | Year | Return | Sharpe | MDD | Trades | Win Rate | BnH |
-----------------------------------------------------------
+|------|--------|--------|-----|--------|----------|-----|
 | 2021 | 0.00% (blocked) | — | — | 0 | — | +64.2% |
 | 2022 | **-9.0%** | 0.441 | -22.1% | 64 | 0.469 | -64.2% |
 | 2023 | +13.8% | N/A* | -2.1% | 9 | 0.667 | +156.1% |
@@ -176,7 +176,7 @@ Low standard deviation confirms results are not dependent on a lucky random seed
 ### ETH Out-of-Sample (Same Model, Same Parameters)
 
 | Year | Return | MDD | Trades | BnH |
-----------------------------------------------------------
+|------|--------|-----|--------|-----|
 | 2021 | 0.00% (blocked) | — | 0 | +409.1% |
 | 2022 | **+14.1%** | -47.8% | 228 | -67.6% |
 | 2023 | +12.2% | 0.0% | 1 | +92.5% |
@@ -199,7 +199,7 @@ Low standard deviation confirms results are not dependent on a lucky random seed
 Honest record of what was tried and why it was abandoned.
 
 | Attempt | Result | Reason Abandoned |
-----------------------------------------------------------
+|---------|--------|-----------------|
 | 15-min target | Failed | Lag-1 AC -0.05, pure noise |
 | Long + Short | Failed | Short signals inconsistent across all years |
 | HMM Regime Filter (3-state) | Failed | Distribution shift, model misclassified BTC regimes |
@@ -289,8 +289,8 @@ Strong bull market underperformance is reported without hiding. Failed attempts 
 ## Future Work
 
 **Project 2 — Statistical Mean Reversion Alpha Strategy Modeling**
-  - Bollinger Band ±2σ breakout with candlestick pattern confirmation.
-  - Multi-timeframe: 4-hour signal + 15-minute entry timing.
+  - Bollinger Band ±2σ breakout with several regime filters.
+  - Multi-timeframe: A day or 4-hour signal + 1 hour entry (testing...)
   - CLT-based justification (window ≥ 30).
 
 **Project 3 — Option Pricing Modeling**
@@ -304,7 +304,7 @@ Strong bull market underperformance is reported without hiding. Failed attempts 
 ---
 
 **Data source: Binance USDT-M Perpetual Futures**
-**Backtest period: 2021–2026 (6-year walk-forward)**
+**Backtest period: 2021–2025 (5-year walk-forward)**
 **Out-of-sample: ETH validation with identical model setup**
 
 
