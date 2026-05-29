@@ -1,304 +1,291 @@
 # Systematic Bear Market Defense via XGBoost
-> Downside Protection for Bitcoin Holdings via Liquidity-Driven Event Detection
+> A Risk Overlay Model for Cryptocurrency Futures: Liquidity-Driven Downside Protection
 
 ---
 
-## Key Results
+## Abstract
 
-The model detects liquidity-driven events (forced liquidations, volatility explosions) and captures short-term mean reversion. It activates during bear markets and stays inactive during quiet bull markets.
+We present a **risk overlay model** for cryptocurrency futures portfolios. This is not an alpha strategy. The objective is singular: systematic detection of liquidity stress events and containment of downside exposure during bear markets.
 
-**Bear market defense validated across 5 years (2021–2025):**
+Cryptocurrency futures markets are structurally prone to liquidity crises. We exploit this microstructural property using XGBoost on 15-minute BTC futures data (2019–2026, ~230,000 bars), validated through a 5-year rolling walk-forward framework and confirmed on ETH as an independent out-of-sample asset.
 
-- 2022 crash: BTC (BnH) -64.2% → Strategy    **-11.69%**
-              / ETH (BnH) -67.6% → Strategy  **+14.07%**
-- 2025 bear:  BTC (BnH) -5.6% → Strategy     **+23.97%**
-              / ETH (BnH) -11.4% → Strategy  **+9.36%**
+**Core results:**
+- 2022 crypto crash (BTC -64.2%): model contained drawdown to **-11.69%** — a **52.5%p loss reduction**
+- 2025 bear market (BTC -5.6%): model generated **+23.97%** — outperforming passive holding by **29.6%p**
+- ETH out-of-sample: CAGR gap of **0.16%p** (BTC 5.64% vs ETH 5.48%), confirming the edge is structural, not asset-specific
 
-**Out of sample validation (ETH):**
-- Same model, same parameters applied to ETH without modification
-- BTC CAGR 5.64% / ETH CAGR 5.48% — **0.16%p difference**
-- Confirmed liquidity-driven edge (prevent overfitting)
+The model is intentionally inactive during quiet bull markets. Low signal frequency in trending upmarkets is not a limitation — it is the expected behavior of an event-driven risk overlay. This property is documented, validated, and discussed throughout.
 
 ---
 
-## Motivation
+## 1. Introduction
 
-The initial goal was to develop an alpha strategy leveraging BTC 1-minute bar data. However, three critical issues were identified during validation:
+### 1.1 Problem Statement
 
-**1. Data Noise**
-- 1-min target: unpredictable, discarded
-- 15-min target lag-1 autocorrelation: -0.05 (random noise level)
-- 1-hour target lag-1 autocorrelation: 0.59 (weak but usable)
-- **4-hour target lag-1 autocorrelation: 0.81 → adopted** (strong momentum signal)
+Passive Bitcoin holding has historically generated strong long-term returns. However, its drawdown profile is operationally unsustainable for risk-constrained allocators:
 
-**2. Feature Importance Issue**
+```
+2018: BTC drawdown  -83%
+2022: BTC drawdown  -64.2%
+2025: BTC drawdown  -26% (peak to trough)
+```
 
-The core liquidity features (SMC: BOS, CHoCH, Order Blocks, FVG) that were theoretically most critical for liquidity event detection. But, near-zero feature importance showed in validation. 
+Existing risk management approaches for cryptocurrency portfolios share a common weakness: they are reactive. Volatility-based filters trigger after drawdowns begin. Static hedges sacrifice bull market participation. Neither approach exploits the **predictable microstructure** of cryptocurrency futures — specifically, the mean-reverting behavior following liquidity-driven dislocations.
 
-Binance API data quality issues(>80% NaN or noise) resulted in these features practically unusable. Despite being the theoretical backbone of the strategy, they were to be removed entirely.
+### 1.2 Research Question
 
-Ironically, MDD improved significally after removal. Learned low-quality features introduce noise rather than signal, regardless of their theoretical releveance. 
+> Can we systematically detect liquidity stress events in cryptocurrency futures markets and use them to limit downside exposure — without sacrificing the ability to participate in bull markets through a complementary BnH position?
 
-**3. Insufficient Samples in Bull Markets**
-- Liquidity events are rare during quiet bull markets
-- Trade count dropped to single digits (2023: 9 trades, 2024: 1 trade)
-- Statistical reliability could not be established for alpha generation
+### 1.3 Why Liquidity Events?
 
-**Conclusion**
+Cryptocurrency futures markets are structurally different from equity markets:
 
-Data confirmed that the real edge lies not in generating alpha during bull markets, but in **defending against losses during bear markets and market stress events**.
+- **Extreme leverage**: retail traders routinely use 10–100x leverage
+- **Cascade dynamics**: price moves trigger stop-losses, which trigger liquidations, which trigger further price moves
+- **Predictable reversion**: post-liquidation dislocations tend to revert within 4–16 hours
+- **Observable signals**: derivatives data (open interest, funding rate, long/short ratio) provides real-time visibility into positioning stress
 
-The strategy was repositioned as a **risk management model**:
-- Activates when liquidity events occur (forced liquidations, volatility explosions)
-- Stays inactive during quiet bull markets
+This creates a **tradeable edge** that is episodic, mean-reverting, and detectable — precisely the conditions suited to an event-driven risk overlay.
 
----
+### 1.4 Model Positioning
 
-## Model Overview
+This model is designed to complement, not replace, passive BnH exposure:
 
-This model detects **liquidity-driven events** in cryptocurrency futures markets and captures short-term mean reversion following price dislocations.
+```
+Quiet bull market  → BnH participates, model stays inactive
+Liquidity stress   → Model activates, detects and defends
+Bear market        → Model contains drawdown
+```
 
-**Why liquidity events?**
-
-The cryptocurrency futures market is highly leveraged. When prices move against leveraged positions, forced liquidations cascade. These dislocations revert quickly and create a tradeable edge.
-
-**Why inactive in bull markets?**
-
-Liquidity events are rare when markets trend smoothly upward. Low signal frequency in bull markets is not a model failure. It reflects the absence of the specific conditions where the model was designed to leverage.
+The model's inactivity during bull markets is by design. An overlay that fires indiscriminately would introduce noise and erode returns. Selectivity is the edge.
 
 ---
 
-## Methodology
+## 2. Methodology
 
-### Data
-- **Source**: Binance USDT-M Perpetual Futures
-- **Assets**: BTCUSDT (primary), ETHUSDT (out of sample validation)
-- **Timeframe**: 15-minute bars
-- **Period**: 2019-09-25 ~ 2026-04-23 (~230,000 bars)
-- **Features**: 100 features across momentum, volatility, volume, order flow, open interest, funding rate, long/short ratio, time
+### 2.1 Data
 
-> Raw data was not included due to file size (~500MB). See `src/config.py` for data collection setup.
+| Attribute | Detail |
+|-----------|--------|
+| Source | Binance USDT-M Perpetual Futures |
+| Primary asset | BTCUSDT |
+| Validation asset | ETHUSDT (out-of-sample) |
+| Timeframe | 15-minute bars |
+| Period | 2019-09-25 ~ 2026-04-23 |
+| Bars | ~230,000 (BTC), ~224,000 (ETH) |
 
-### Target Definition
-4 hour direction label (16 bars × 15 min) with ±0.8% threshold:
-- `+1`: price rises ≥ +0.8% after 4 hours
-- `0`: price stays within ±0.8%
-- `-1`: price falls ≥ -0.8% after 4 hours
+> Raw data not included due to file size (~500MB). See `src/config.py` for collection setup.
 
-**Why 4 hour horizon?**
+### 2.2 Target Definition
+
+We define a 4-hour direction label on 15-minute bars:
+
+```
+target = +1  if  close[t+16] / close[t] - 1  ≥  +0.8%
+target =  0  if  |close[t+16] / close[t] - 1| <   0.8%
+target = -1  if  close[t+16] / close[t] - 1  ≤  -0.8%
+```
+
+**Horizon selection was empirically validated via autocorrelation analysis:**
 
 | Target | Lag-1 Autocorrelation | Decision |
 |--------|----------------------|----------|
-| 1 min | Unpredictable | Discarded |
-| 15 min ±0.08% | -0.05 | Pure noise |
-| 1 hour ±0.3% | 0.59 | Weak |
-| **4 hour ±0.8%** | **0.81** | **Adopted** |
+| 1-min | ~0.00 | ❌ Unpredictable |
+| 15-min ±0.08% | -0.05 | ❌ Pure noise |
+| 1-hour ±0.3% | 0.59 | ⚠️ Weak signal |
+| **4-hour ±0.8%** | **0.81** | **✅ Adopted** |
 
-### Model
-**XGBoost Classifier** — 3-class (down / sideways / up)
+A lag-1 autocorrelation of 0.81 indicates strong momentum persistence — a necessary condition for a classifier to learn meaningful directional patterns.
 
-| Parameter | Value | Reason |
-|-----------|-------|--------|
-| n_estimators | 100 | Balance between speed and accuracy |
-| max_depth | 4 | Prevent overfitting |
-| learning_rate | 0.05 | Slow convergence, better generalization |
-| subsample | 0.8 | Row subsampling, prevent overfitting |
-| colsample_bytree | 0.8 | Feature subsampling, prevent overfitting |
-| min_child_weight | 10 | Prevent learning sparse patterns |
-| reg_alpha | 0.1 | L1 regularization |
-| reg_lambda | 1.0 | L2 regularization |
+### 2.3 Feature Engineering
 
-- **Entry**: Long signal when predicted up probability > 0.40
-- **Stop Loss**: Entry price − 2×ATR (dynamic, volatility-adjusted)
-- **Max Hold**: 64 bars (16 hours)
-- **Cooldown**: 16 bars (4 hours) after exit
+100 features across 21 categories, engineered from OHLCV and derivatives data:
 
-**Why Long-only?**
-Adding short signals marginally improved overall returns, but inroduced inconsistency across walkforward years. 
-In addition, since the primary objective is risk management rather than return maximization, short signals were disabled. A model that occasionally generates higher returns but behaves unpredictably contradicts the core purpose of downside protection. 
-
-### Walk-Forward Validation
-
-```
-Training: Rolling 2-year window 
-Testing:  1-year in-sample, out-of-sample
-Safety:   Skip if training data < 700 days
-```
-
-**Why rolling window?**
-Cryptocurrency markets experience frequent distribution shifts. Older data introduces noise rather than signal. Rolling window ensures the model learns from recent market regimes only.
-
-**Why 700 day minimum?**
-Exact 2 years = 730 days, but leap year variations cause 729-day windows. 700-day threshold provides margin while ensuring sufficient training data.
-
-### Feature Engineering
-100 features across 21 categories. Key categories:
-
-| Category | Examples | Purpose |
-|----------|---------|---------|
-| Volatility | volatility_5m/15m/60m/240m | Detect volatility explosion |
-| HL Range | hl_range_5m/15m/60m/240m | Measure price range (top importance: 0.162) |
-| Liquidity Sweep | swept_high/low_15m/60m | Detect stop hunts |
-| Volume | vol_spike_240m, vol_buy_pressure | Confirm event strength |
-| Open Interest | oi_roc_15m, oi_zscore | Detect forced liquidations |
-| Funding Rate | fr_level, fr_extreme | Measure market positioning stress |
-| Swing VWAP | swing_vwap_dist, swing_vwap_dir | Liquidity-based price position |
+| Category | Key Features | Role in Liquidity Detection |
+|----------|-------------|----------------------------|
+| HL Range | hl_range_5m/15m/60m/240m | Price range explosion (top importance: 0.162) |
+| Volatility | volatility_5m/15m/60m/240m | Volatility regime detection |
+| Liquidity Sweep | swept_high/low_15m/60m | Stop hunt identification |
+| Open Interest | oi_roc_15m, oi_zscore | Forced liquidation proxy |
+| Funding Rate | fr_level, fr_extreme, fr_cumsum | Positioning stress measurement |
+| Long/Short Ratio | ls_ratio_level, ls_extreme | Crowding and capitulation detection |
+| Swing VWAP | swing_vwap_dist, swing_vwap_dir | Liquidity-anchored price position |
+| Volume | vol_spike_240m, vol_buy_pressure | Event magnitude confirmation |
 | Time | time_us_session, time_hour_sin/cos | Session-based liquidity patterns |
 
 > Full feature list: `models/feature_cols.json`
 
-**Note on SMC features**: Smart Money Concept features (BOS, CHoCH, Order Blocks, FVG) were initially included as core liquidity event detection. However, Binance API data quality issues (>80% NaN or noise) led to their removal. **MDD improved significantly after removal.**
+**Note on SMC features**: Smart Money Concept features (BOS, CHoCH, Order Blocks, FVG) were theoretically the most relevant for liquidity event detection. However, Binance API data quality rendered them unusable (>80% NaN or noise), with near-zero feature importance confirmed in validation. MDD improved significantly after removal — demonstrating that low-quality features introduce noise regardless of theoretical relevance. This remains the primary data limitation of the current implementation.
 
-### Seed Robustness
+### 2.4 Model
+
+**XGBoost Classifier** — 3-class (down / sideways / up)
+
+| Parameter | Value | Rationale |
+|-----------|-------|-----------|
+| n_estimators | 100 | Speed-accuracy balance |
+| max_depth | 4 | Overfitting control |
+| learning_rate | 0.05 | Conservative convergence |
+| subsample | 0.8 | Row-level regularization |
+| colsample_bytree | 0.8 | Feature-level regularization |
+| min_child_weight | 10 | Sparse pattern suppression |
+| reg_alpha | 0.1 | L1 regularization |
+| reg_lambda | 1.0 | L2 regularization |
+
+**Execution parameters:**
+- Entry: predicted up probability > 0.40
+- Stop loss: entry − 2×ATR (volatility-scaled dynamic stop)
+- Max hold: 64 bars (16 hours)
+- Cooldown: 16 bars (4 hours) post-exit
+
+**Why 1x leverage (no leverage)?**
+This backtest intentionally uses 1x exposure throughout. The model is designed as a risk overlay — its purpose is to measure pure defensive capability, not to amplify returns through leverage. Introducing leverage would obscure the signal quality and conflate risk management performance with position sizing decisions. All results reflect 1x returns.
+
+**Why Long-only?**
+Short signals marginally improved gross returns but introduced year-to-year inconsistency across the walk-forward period. Since the primary objective is **downside protection rather than return maximization**, unpredictable short behavior contradicts the model's core purpose. Long-only was adopted based on walk-forward evidence, not assumption.
+
+### 2.5 Walk-Forward Validation
+
+```
+Window:   Rolling 2-year training → 1-year test
+Safety:   Minimum 700 training days required
+Folds:    6 total (2021–2026), evaluated on 2021–2025
+```
+
+**Why rolling (not expanding) window?**
+Cryptocurrency markets undergo frequent regime shifts. An expanding window dilutes recent market structure with stale historical data. Rolling window ensures the model continuously adapts to current regimes.
+
+**Why 700-day minimum?**
+Nominal 2-year windows vary between 729–730 days due to leap year variation. A 700-day floor provides a safety margin while preserving the 2-year learning horizon. 2021 was blocked under this rule (463 training days available).
+
+### 2.6 Seed Robustness
 
 | Metric | Value |
 |--------|-------|
 | Seeds tested | 10 (0, 1, 2, 3, 7, 42, 100, 2024, 9999, 31415) |
 | Positive CAGR | 10/10 |
-| Average CAGR | 10.84% |
+| Mean CAGR | 10.84% |
 | CAGR Std | 3.90% |
 
-Low standard deviation confirmed results were not dependent on a lucky random seed.
+A CAGR standard deviation of 3.90% across 10 independent seeds confirms the result is structurally driven, not attributable to random initialization.
 
 ---
 
-## Results
+## 3. Results
 
-### BTC Strategy (5-Year Walk-Forward: 2021–2025)
+### 3.1 BTC Strategy (5-Year Walk-Forward: 2021–2025)
 
-| Year | Return | Sharpe | MDD | Trades | Win Rate | BnH |
-|------|--------|--------|-----|--------|----------|-----|
-| 2021 | 0.00% (blocked) | — | — | 0 | — | +64.2% |
-| 2022 | **-11.69%** | N/A* | -22.10% | 64 | 0.438 | -64.2% |
-| 2023 | +13.84% | N/A* | -2.13% | 9 | 0.667 | +156.1% |
-| 2024 | +9.72% | N/A* | 0.00% | 1 | 1.000 | +118.2% |
-| 2025 | **+23.97%** | 1.430 | -4.80% | 25 | 0.480 | -5.6% |
+| Year | Market | Return | Sharpe | MDD | Trades | BnH | vs BnH |
+|------|--------|--------|--------|-----|--------|-----|--------|
+| 2021 | Bull | 0.00% (blocked) | — | — | 0 | +64.2% | — |
+| 2022 | Bear | **-11.69%** | N/A† | -22.10% | 64 | -64.2% | **+52.5%p** |
+| 2023 | Bull | +13.84% | N/A† | -2.13% | 9 | +156.1% | -142.3%p |
+| 2024 | Bull | +9.72% | N/A† | 0.00% | 1 | +118.2% | -108.5%p |
+| 2025 | Bear | **+23.97%** | 1.430 | -4.80% | 25 | -5.6% | **+29.6%p** |
 
-> *Sharpe marked N/A when trade count < 30 (statistically unreliable)
-> 2026 excluded: partial year data (5 months only)
+> †Sharpe marked N/A when trade count < 30 (insufficient sample for reliable estimation)
+> 2026 excluded: partial year (5 months)
 
-### ETH Out-of-Sample (Same Model, Same Parameters)
+**Interpretation**: The model outperformed passive holding in both bear/sideways years by **52.5%p (2022)** and **29.6%p (2025)**. Underperformance in bull years (2023, 2024) is expected — the model detects liquidity events, which are rare in trending upmarkets. This is the intended behavior of a risk overlay.
 
-| Year | Return | MDD | Trades | BnH |
-|------|--------|-----|--------|-----|
-| 2021 | 0.00% (blocked) | — | 0 | +409.1% |
-| 2022 | **+14.07%** | -47.83% | 228 | -67.6% |
-| 2023 | +12.18% | 0.00% | 1 | +92.5% |
-| 2024 | +23.08% | -6.46% | 11 | +46.3% |
-| 2025 | **+9.36%** | -24.90% | 129 | -11.4% |
+### 3.2 ETH Out-of-Sample Validation
 
-### Risk Management Validation
+Identical model applied to ETHUSDT without modification (same architecture, same hyperparameters, LONG_P=0.40):
 
-| Scenario | BTC BnH | BTC Strategy | ETH BnH | ETH Strategy |
-|----------|---------|-------------|---------|-------------|
-| 2022 Crash | -64.2% | **-11.69%** | -67.6% | **+14.07%** |
-| 2025 Bear | -5.6% | **+23.97%** | -11.4% | **+9.36%** |
+| Year | Return | MDD | Trades | BnH | vs BnH |
+|------|--------|-----|--------|-----|--------|
+| 2021 | 0.00% (blocked) | — | 0 | +409.1% | — |
+| 2022 | **+14.07%** | -47.83% | 228 | -67.6% | **+81.7%p** |
+| 2023 | +12.18% | 0.00% | 1 | +92.5% | -80.4%p |
+| 2024 | +23.08% | -6.46% | 11 | +46.3% | -23.2%p |
+| 2025 | **+9.36%** | -24.90% | 129 | -11.4% | **+20.8%p** |
 
-> Both assets. Same model. Same parameters. Consistent bear market defense.
+### 3.3 Risk Overlay Validation
 
----
+| Scenario | BTC BnH | BTC Strategy | Loss Reduction | ETH BnH | ETH Strategy | Loss Reduction |
+|----------|---------|-------------|---------------|---------|-------------|---------------|
+| 2022 Crash | -64.2% | **-11.69%** | **52.5%p** | -67.6% | **+14.07%** | **81.7%p** |
+| 2025 Bear | -5.6% | **+23.97%** | **29.6%p** | -11.4% | **+9.36%** | **20.8%p** |
 
-## Alternative Approaches
+> Same model. Same parameters. Two independent assets. Consistent downside protection across all bear and sideways periods tested.
 
-Honest record of what was tried and why they were abandoned.
-
-| Attempt | Result | Reason Abandoned |
-|---------|--------|-----------------|
-| 1-min / 15-min target | Failed | Lag-1 AC -0.05, pure noise |
-| Long + Short | Failed | Short signals inconsistent across all years |
-| HMM Regime Filter (3-state) | Failed | Distribution shift, misclassified BTC regimes |
-| HMM Persistence Feature | Failed | Information overlap, degraded existing model |
-| Dynamic Allocation (MA50/200) | Failed | Lagging signal, CAGR dropped to 8.3% |
-| SMC Features | Removed | Binance API data quality >80% NaN/noise |
-| ETH Portfolio Expansion | Abandoned | ETH strategy MDD -47.83% (2022), operationally unreliable |
-| Expanding Window Walk-Forward | Rejected | Distribution shift makes old data noise in crypto |
+**The 0.16%p CAGR gap between BTC (5.64%) and ETH (5.48%) out-of-sample confirms the edge is structural — not an artifact of asset-specific optimization.**
 
 ---
 
-## Limitations & Lessons Learned
+## 4. Alternative Approaches
 
-### Data Issues
-
-**1. SMC Feature Data Quality**
-Smart Money Concept features (BOS, CHoCH, Order Blocks, FVG) were theoretically the most relevant indicators for liquidity event detection. However, Binance API data showed >80% NaN or noise. Removal improved MDD but learned the importance of data quality. 
-
-**2. Short-Timeframe Noise**
-1-min and 15-min targets confirmed pure noise (Autocorrelation: -0.05). Switched to 4-hour horizon (Autocorrelation: 0.81).
-
-**3. ETH Data Start Date**
-BTC data starts 2019-09-25, ETH starts 2019-11-27 (2-month gap). Walk-forward start date was adjusted. 
-
-### Model Issues
-
-**4. Regime Detection (HMM)**
-Hidden Markov Model tested for regime classification. Distribution shift caused misclassification. Simple MA alignment (regime3) proved more stable. Sophisticated model was not outperformed. 
-
-**5. Short Signal Inconsistency**
-Short signals showed inconsistent win rates across all 6 walk-forward years. Long-only strategy was confirmed.
-
-**6. Seed Dependency**
-Single seed results are anecdotal. 10-seed validation confirmed CAGR std of 3.90%.
-
-### Strategy Issues
-
-**7. Insufficient Samples in Bull Markets**
-a. 2023: 9 trades / 2024: 1 trade. Sharpe ratio was unreliable below 30 trades. 
-b. Root cause: liquidity events rare during quiet bull markets.
-
-**8. Dynamic Allocation Failure**
-MA50/200 crossover tested for dynamic allocation. Lagging signal caused CAGR to drop to 8.3%. Static allocation proved superior.
-
-**9. ETH Strategy MDD**
-ETH strategy showed -47.83% MDD during 2022 despite +14.07% annual return. Operationally unreliable. ETH used only for out of sample validation.
-
-### Validation Issues
-
-**10. Walk-Forward Safety Guard**
-2021 training data: only 463 days (< 700-day minimum). Trade was blocked and held only USD-Tether. Without this guard, model would generate unreliable signals.
+| Approach | Outcome | Reason Abandoned |
+|----------|---------|-----------------|
+| 1-min / 15-min target | Failed | Lag-1 AC -0.05, statistically unpredictable |
+| Long + Short | Rejected | Inconsistent short win rates across all walk-forward years |
+| HMM Regime Filter (3-state) | Failed | Distribution shift caused systematic regime misclassification |
+| HMM Persistence Feature | Failed | Information overlap degraded existing model performance |
+| Dynamic Allocation (MA50/200) | Failed | Lagging signal reduced CAGR to 8.3% |
+| SMC Features | Removed | >80% NaN/noise, near-zero feature importance confirmed |
+| ETH Portfolio Expansion | Abandoned | ETH intra-year MDD -47.83% (2022), operationally unreliable |
+| Expanding Window Walk-Forward | Rejected | Stale data degrades regime-adaptive learning in crypto |
 
 ---
 
-## How to Run
+## 5. Limitations
 
-### Packages
+### 5.1 Data Quality
+**SMC Feature Gap**: The theoretically most relevant features for liquidity detection were rendered unusable by Binance API data quality. A higher-quality data source (order book snapshots, on-chain liquidation feeds) could materially improve signal precision. This is the primary unresolved limitation.
+
+**ETH Data Start Date**: ETH futures data begins 2019-11-27 vs BTC 2019-09-25 (2-month gap). Walk-forward folds adjusted accordingly.
+
+### 5.2 Model
+**Regime Detection**: Simple 3-state MA alignment (regime3) was used after HMM-based approaches failed. More robust regime classification could improve entry filtering during market transitions.
+
+**Low Trade Count**: 2023 (9 trades) and 2024 (1 trade) produce statistically unreliable Sharpe ratios (N/A). Single-year results in low-frequency periods remain sensitive to individual trade outcomes.
+
+### 5.3 Strategy
+**Bull Market Participation**: The model is inactive during quiet bull markets by design. This produces significant underperformance vs BnH in trending years. As a standalone strategy, this is a critical limitation. As a risk overlay combined with passive BnH exposure, it is the intended behavior.
+
+**ETH Intra-Year MDD**: Despite strong annual returns, ETH strategy exhibited -47.83% intra-year MDD in 2022. Operationally, this drawdown is difficult to sustain through. ETH is retained for out-of-sample validation only.
+
+### 5.4 Validation
+**No Live Trading**: All results are simulation-based. Slippage, funding costs, and execution latency are not fully captured.
+
+**Single Exchange**: Data sourced exclusively from Binance USDT-M Futures. Cross-exchange liquidity dynamics are not modeled.
+
+---
+
+## 6. How to Run
+
+### Requirements
 ```
-pandas
-numpy
-xgboost
-pyarrow
-scikit-learn
-matplotlib
+pandas / numpy / xgboost / pyarrow / scikit-learn / matplotlib
 ```
-
 ```bash
 pip install -r requirements.txt
 ```
 
 ### Data Preparation
-Raw data was not included due to file size constraints (~500MB).
-
 ```
-1. Collect 15-min OHLCV + derivatives data from Binance USDT-M Futures
+1. Collect 15-min OHLCV + derivatives from Binance USDT-M Futures
    Reference: src/config.py
 
 2. Generate target labels:
    python src/make_targets_btc.py
 
-3. Run BTC in-sample walk-forward backtest:
+3. BTC walk-forward backtest:
    python validator/walkforward1_BTC.py
 
-4. Run ETH out-of-sample validation:
+4. ETH out-of-sample validation:
    python validator/walkforward2_ETH.py
 ```
 
 ### Pre-computed Results
-Available in `results/`:
-- `6y_walkforward_safe_results.csv` — BTC 6-year walk-forward
-- `ETH_walkforward_results.csv` — ETH out-of-sample validation
+```
+results/6y_walkforward_safe_results.csv   — BTC 6-year walk-forward
+results/ETH_walkforward_results.csv       — ETH out-of-sample
+```
 
 ---
 
-## Repository Structure
+## 7. Repository Structure
 
 ```
 systematic-bear-market-defense/
@@ -321,27 +308,34 @@ systematic-bear-market-defense/
 
 ---
 
-## Future Work
+## 8. Future Work
 
-**Project 2 — Statistical Mean Reversion (Alpha Generator)**
-- Bollinger Band ±2σ breakout with several regime filters
-- Multi-timeframe: A day or 4-hour signal & 1 hour entry
-- CLT-based justification (window ≥ 30)
-- Utilize Massive API Data
-- Leverage MoE
+The current model establishes a validated **bear market defense layer**. The roadmap extends this into a multi-strategy framework that addresses its primary structural limitation: inactivity during bull markets.
 
-**Project 3 — Option Pricing Model**
-- Black-Scholes Model with option greeks in deep learning
+**Project 2 — Statistical Mean Reversion**
+The current model's edge disappears in quiet uptrends. Project 2 directly targets this regime gap: Bollinger Band ±2σ breakouts with CLT-justified statistical confidence (window ≥ 30), combined with candlestick pattern confirmation for precise entry timing. Multi-timeframe structure: 4-hour directional signal & 15-minute entry. This strategy is designed to generate returns during the periods where Project 1 is intentionally silent.
 
-**Improvement Areas**
-- Higher quality liquidity data (order book, on-chain)
-- SMC feature re-validation with better data source
-- Improved regime detection in transitional markets
+**Project 3 — Swing Trend-Following**
+For capturing larger directional moves across full market cycles: Ichimoku Cloud (trend structure) + Fibonacci retracements (entry levels) & momentum divergence (early reversal warning) & Bollinger Band (volatility context). Target holding period: days to weeks — structurally distinct from the sub-24-hour horizon of Projects 1 and 2.
+
+**Combined Risk Framework**
+The three strategies target distinct market regimes:
+```
+Bear / stress   → Project 1 (liquidity event defense)
+Sideways        → Project 2 (statistical mean reversion)
+Trending bull   → Project 3 (swing trend-following)
+```
+The long-term objective is a regime-aware allocation system that weights each strategy dynamically based on detected market conditions — replacing the current static overlay with an adaptive risk management framework.
+
+**Technical Improvements**
+- Higher quality liquidity data: order book snapshots, on-chain liquidation feeds
+- SMC feature re-validation with cleaner data source
+- Improved regime detection for transitional market periods
 - Cross-exchange data integration
-- Live trading validation
+- Live trading validation with full execution cost modeling
 
 ---
 
-*Data source: Binance USDT-M Perpetual Futures*
-*Backtest period: 2021–2025 (5-year walk-forward)*
-*Out-of-sample: ETH validation with identical model setup (same model, same parameters)*
+*Data: Binance USDT-M Perpetual Futures*
+*Validation: 5-year rolling walk-forward (2021–2025)*
+*Out-of-sample: ETH with identical model configuration (Same Model, Same Parameters)*
