@@ -200,9 +200,9 @@ Low standard deviation confirmed results were not dependent on a lucky random se
 
 ---
 
-## Failed Attempts
+## Alternative Approaches
 
-Honest record of what was tried and why it was abandoned.
+Honest record of what was tried and why they were abandoned.
 
 | Attempt | Result | Reason Abandoned |
 |---------|--------|-----------------|
