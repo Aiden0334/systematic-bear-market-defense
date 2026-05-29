@@ -57,7 +57,7 @@ Liquidity stress   → Model activates, detects and defends
 Bear market        → Model contains drawdown
 ```
 
-<img width="2084" height="924" alt="chart5_regime_distribution" src="https://github.com/user-attachments/assets/386f4854-c079-4af4-b308-8baebef20edd" />
+<img width="1870" height="1199" alt="chart5_regime_donut" src="https://github.com/user-attachments/assets/f5caae61-a90e-48ed-9045-0af270d9ce27" />
 
 
 The model's inactivity during bull markets is by design. An overlay that fires indiscriminately would introduce noise and erode returns. Selectivity is the edge.
