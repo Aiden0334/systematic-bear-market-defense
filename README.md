@@ -37,7 +37,7 @@ The initial goal was to develop an alpha strategy leveraging BTC 1-minute bar da
 
 The core liquidity features (SMC: BOS, CHoCH, Order Blocks, FVG) that were theoretically most critical for liquidity event detection. But, near-zero feature importance showed in validation. 
 
-Binance API data quality issues(>80% NaN or noise) resulted in these features practically unusable. Despite being the theoretical backbone of the strategy, they ahd to be removed entirely.
+Binance API data quality issues(>80% NaN or noise) resulted in these features practically unusable. Despite being the theoretical backbone of the strategy, they were to be removed entirely.
 
 Ironically, MDD improved significally after removal. Learned low-quality features introduce noise rather than signal, regardless of their theoretical releveance. 
 
