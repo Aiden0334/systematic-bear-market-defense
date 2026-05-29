@@ -74,7 +74,7 @@ The model's inactivity during bull markets is by design. An overlay that fires i
 | Period | 2019-09-25 ~ 2026-04-23 |
 | Bars | ~230,000 (BTC), ~224,000 (ETH) |
 
-> Raw data not included due to file size (~500MB). See `src/config.py` for collection setup.
+> Raw data was not included due to file size (~500MB). See `src/config.py` for collection setup.
 
 ### 2.2 Target Definition
 
