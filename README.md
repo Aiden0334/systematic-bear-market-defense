@@ -5,8 +5,6 @@
 
 ## Key Results
 
-**This is not an alpha strategy. This is a risk management model.**
-
 The model detects liquidity-driven events (forced liquidations, volatility explosions) and captures short-term mean reversion. It activates during bear markets and stays inactive during quiet bull markets.
 
 **Bear market defense validated across 5 years (2021–2025):**
