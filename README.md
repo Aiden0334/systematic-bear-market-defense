@@ -156,12 +156,8 @@ Nominal 2-year windows vary between 729–730 days due to leap year variation. A
 
 ### 2.6 Seed Robustness
 
-| Metric | Value |
-|--------|-------|
-| Seeds tested | 10 (0, 1, 2, 3, 7, 42, 100, 2024, 9999, 31415) |
-| Positive CAGR | 10/10 |
-| Mean CAGR | 10.84% |
-| CAGR Std | 3.90% |
+<img width="1785" height="732" alt="chart3_seed_robustness" src="https://github.com/user-attachments/assets/45157680-2a12-497c-9d23-6b9acb464aab" />
+
 
 A CAGR standard deviation of 3.90% across 10 independent seeds confirms the result is structurally driven.
 
