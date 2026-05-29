@@ -159,7 +159,8 @@ Nominal 2-year windows vary between 729–730 days due to leap year variation. A
 
 ### 2.6 Seed Robustness
 
-30-seed validation confirmed structural bear market defense. All 30 seeds contained 2022 drawdown below BnH (-64.2%), ranged from -5.93% to -32.63%(Mean: -19.02%). 2025 bear market: 30/30 seeds positive (Mean: +24.21%). Defense is structural, not seed-dependent.
+30-seed validation confirmed structural bear market defense. All 30 seeds contained 2022 drawdown below BnH (-64.2%), ranged from -5.93% to -32.63% (Mean: -19.02%). 2025 bear market: 30/30 seeds positive (Mean: +24.21%). Defense is structural, not seed-dependent. 
+
 ---
 
 ## 3. Results
