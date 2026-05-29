@@ -115,7 +115,7 @@ A lag-1 autocorrelation of 0.81 indicates strong momentum persistence — a nece
 
 > Full feature list: `models/feature_cols.json`
 
-**Note on SMC features**: Smart Money Concept features (BOS, CHoCH, Order Blocks, FVG) were theoretically the most relevant for liquidity event detection. However, Binance API data quality rendered them unusable (>80% NaN or noise), with near-zero feature importance confirmed in validation. MDD improved significantly after removal — demonstrating that low-quality features introduce noise regardless of theoretical relevance. This remains the primary data limitation of the current implementation.
+**Note on SMC features**: Smart Money Concept features (BOS, CHoCH, Order Blocks, FVG) were theoretically the most relevant for liquidity event detection. However, Binance API data quality rendered them unusable (>80% NaN or noise), with near-zero feature importance confirmed in validation. MDD improved significantly after removal — demonstrated that low-quality features introduce noise regardless of theoretical relevance. This remains the primary data limitation of the current implementation.
 
 ### 2.4 Model
 
@@ -142,7 +142,7 @@ A lag-1 autocorrelation of 0.81 indicates strong momentum persistence — a nece
 This backtest intentionally uses 1x exposure throughout. The model is designed as a risk overlay — its purpose is to measure pure defensive capability, not to amplify returns through leverage. Introducing leverage would obscure the signal quality and conflate risk management performance with position sizing decisions. All results reflect 1x returns.
 
 **Why Long-only?**
-Short signals marginally improved gross returns but introduced year-to-year inconsistency across the walk-forward period. Since the primary objective is **downside protection rather than return maximization**, unpredictable short behavior contradicts the model's core purpose. Long-only was adopted based on walk-forward evidence, not assumption.
+Short signals marginally improved gross returns but introduced year-to-year inconsistency across the walk-forward period. Since the primary objective is **downside protection rather than return maximization**, unpredictable short behavior contradicts the model's core purpose. Long-only was adopted based on walk-forward evidence.
 
 ### 2.5 Walk-Forward Validation
 
@@ -152,8 +152,8 @@ Safety:   Minimum 700 training days required
 Folds:    6 total (2021–2026), evaluated on 2021–2025
 ```
 
-**Why rolling (not expanding) window?**
-Cryptocurrency markets undergo frequent regime shifts. An expanding window dilutes recent market structure with stale historical data. Rolling window ensures the model continuously adapts to current regimes.
+**Why rolling window?**
+Cryptocurrency markets undergo frequent regime shifts. An expanding window dilutes recent market structure with stale historical data. Rolling window ensures the model adapts to current regimes.
 
 **Why 700-day minimum?**
 Nominal 2-year windows vary between 729–730 days due to leap year variation. A 700-day floor provides a safety margin while preserving the 2-year learning horizon. 2021 was blocked under this rule (463 training days available).
@@ -167,7 +167,7 @@ Nominal 2-year windows vary between 729–730 days due to leap year variation. A
 | Mean CAGR | 10.84% |
 | CAGR Std | 3.90% |
 
-A CAGR standard deviation of 3.90% across 10 independent seeds confirms the result is structurally driven, not attributable to random initialization.
+A CAGR standard deviation of 3.90% across 10 independent seeds confirms the result is structurally driven.
 
 ---
 
@@ -231,7 +231,7 @@ Identical model applied to ETHUSDT without modification (same architecture, same
 ## 5. Limitations
 
 ### 5.1 Data Quality
-**SMC Feature Gap**: The theoretically most relevant features for liquidity detection were rendered unusable by Binance API data quality. A higher-quality data source (order book snapshots, on-chain liquidation feeds) could materially improve signal precision. This is the primary unresolved limitation.
+**SMC Feature Gap**: The most relevant features for liquidity detection were rendered unusable by Binance API data quality. A higher-quality data source (order book snapshots, on-chain liquidation feeds) could materially improve signal precision. This is the primary unresolved limitation.
 
 **ETH Data Start Date**: ETH futures data begins 2019-11-27 vs BTC 2019-09-25 (2-month gap). Walk-forward folds adjusted accordingly.
 
@@ -254,7 +254,7 @@ Identical model applied to ETHUSDT without modification (same architecture, same
 
 ## 6. How to Run
 
-### Requirements
+### Packages
 ```
 pandas / numpy / xgboost / pyarrow / scikit-learn / matplotlib
 ```
