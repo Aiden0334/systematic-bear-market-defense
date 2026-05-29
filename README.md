@@ -87,13 +87,9 @@ target = -1  if  close[t+16] / close[t] - 1  ≤  -0.8%
 ```
 
 **Horizon selection was empirically validated via autocorrelation analysis:**
+<img width="1485" height="730" alt="chart2_autocorrelation" src="https://github.com/user-attachments/assets/82ac4256-3f71-48b9-8d63-643d9c8bcf62" />
 
-| Target | Lag-1 Autocorrelation | Decision |
-|--------|----------------------|----------|
-| 1-min | ~0.00 | ❌ Unpredictable |
-| 15-min ±0.08% | -0.05 | ❌ Pure noise |
-| 1-hour ±0.3% | 0.59 | ⚠️ Weak signal |
-| **4-hour ±0.8%** | **0.81** | **✅ Adopted** |
+
 
 A lag-1 autocorrelation of 0.81 indicates strong momentum persistence — a necessary condition for a classifier to learn meaningful directional patterns.
 
