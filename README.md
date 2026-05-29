@@ -175,6 +175,8 @@ A CAGR standard deviation of 3.90% across 10 independent seeds confirms the resu
 | 2024 | Bull | +9.72% | N/A† | 0.00% | 1 | +118.2% | -108.5%p |
 | 2025 | Bear | **+23.97%** | 1.430 | -4.80% | 25 | -5.6% | **+29.6%p** |
 
+<img width="1785" height="883" alt="chart4_drawdown_comparison" src="https://github.com/user-attachments/assets/b5758924-d9d3-4f90-82fc-3f85d6ba9531" />
+
 > †Sharpe marked N/A when trade count < 30 (insufficient sample for reliable estimation)
 > 2026 excluded: partial year (5 months)
 
@@ -195,7 +197,6 @@ Identical model applied to ETHUSDT without modification (same architecture, same
 ### 3.3 Risk Overlay Validation
 
 <img width="2084" height="924" alt="chart1_bear_defense" src="https://github.com/user-attachments/assets/b949810a-e429-4b60-b266-ea3dfbeaf78d" />
-
 
 > Same model. Same parameters. Two independent assets. Consistent downside protection across all bear and sideways periods tested.
 
