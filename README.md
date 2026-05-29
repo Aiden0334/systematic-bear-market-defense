@@ -30,7 +30,7 @@ Passive Bitcoin holding has historically generated strong long-term returns. How
 2025: BTC drawdown  -26% (peak to trough)
 ```
 
-Existing risk management approaches for cryptocurrency portfolios share a common weakness: they are reactive. Volatility-based filters trigger after drawdowns begin. Static hedges sacrifice bull market participation. Neither approach exploits the **predictable microstructure** of cryptocurrency futures — specifically, the mean-reverting behavior following liquidity-driven dislocations.
+Existing risk management approaches for cryptocurrency portfolios share a common weakness: they are reactive. Volatility-based filters trigger after drawdowns begin. Static hedges sacrifice bull market participation. Neither approach exploits the **predictable microstructure** of cryptocurrency futures.
 
 ### 1.2 Research Question
 
