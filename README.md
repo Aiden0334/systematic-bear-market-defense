@@ -198,10 +198,8 @@ Identical model applied to ETHUSDT without modification (same architecture, same
 
 ### 3.3 Risk Overlay Validation
 
-| Scenario | BTC BnH | BTC Strategy | Loss Reduction | ETH BnH | ETH Strategy | Loss Reduction |
-|----------|---------|-------------|---------------|---------|-------------|---------------|
-| 2022 Crash | -64.2% | **-11.69%** | **52.5%p** | -67.6% | **+14.07%** | **81.7%p** |
-| 2025 Bear | -5.6% | **+23.97%** | **29.6%p** | -11.4% | **+9.36%** | **20.8%p** |
+<img width="2084" height="924" alt="chart1_bear_defense" src="https://github.com/user-attachments/assets/b949810a-e429-4b60-b266-ea3dfbeaf78d" />
+
 
 > Same model. Same parameters. Two independent assets. Consistent downside protection across all bear and sideways periods tested.
 
