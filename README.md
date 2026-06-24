@@ -304,17 +304,17 @@ systematic-bear-market-defense/
 The current model establishes a validated **bear market defense layer**. The roadmap extends this into a multi-strategy framework that addresses its primary structural limitation: inactivity during bull markets.
 
 **Project 2 — Statistical Mean Reversion**
-The current model's edge disappears in quiet uptrends. Project 2 directly targets this regime gap: Bollinger Band ±2σ breakouts with CLT-justified statistical confidence (window ≥ 30), combined with candlestick pattern confirmation for precise entry timing. Multi-timeframe structure: 4-hour directional signal & 15-minute entry. This strategy is designed to generate returns during the periods where Project 1 is intentionally silent.
+The current model's edge disappears in quiet uptrends. Project 2 directly targets this regime gap: Bollinger Band ±2σ breakouts with CLT-justified statistical confidence (window ≥ 30), combined with variance ratio test for precise entry timing. Micro Layer - 4-hour directional signal. This strategy is designed to generate returns during the periods where Project 1 is intentionally silent.
 
 **Project 3 — Swing Trend-Following**
-For capturing larger directional moves across full market cycles: Ichimoku Cloud (trend structure) + Fibonacci retracements (entry levels) & momentum divergence (early reversal warning) & Bollinger Band (volatility context). Target holding period: days to weeks — structurally distinct from the sub-24-hour horizon of Projects 1 and 2.
+For capturing larger directional moves across full market cycles: Based on Ichimoku Cloud (trend structure), it would be built multi-time frames (e.g., 1m, 5m, 15m, 1h, 4h, 1D...), as a macro layer. I would develop a market structure regime classification model that compresses price information into multi-scale trend states. The resulted regime labels would be used as filters for momentum-based trading strategies. 
 
 **Combined Risk Framework**
 The three strategies target distinct market regimes:
 ```
 Bear / stress   → Project 1 (liquidity event defense)
-Sideways        → Project 2 (statistical mean reversion)
-Trending bull   → Project 3 (swing trend-following)
+Sideways        → Project 2 (statistical mean reversion, momentum alpha)
+Trending bull   → Project 3 (multi-time frame regime classifier + swing trend-following)
 ```
 The long-term objective is a regime-aware allocation system that weights each strategy dynamically based on detected market conditions — replacing the current static overlay with an adaptive risk management framework.
 
